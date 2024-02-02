@@ -1,0 +1,170 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# The easiest way to get ggplot2 is to install the whole tidyverse:
+install.packages("tidyverse")
+```
+
+
+```{r}
+# installing the necessary packages
+install.packages("ggplot2")
+```
+
+```{r}
+# installing the necessary packages
+library(ggplot2)
+```
+
+```{r}
+# Install plotly package
+install.packages("plotly")
+
+# Install ggsci package
+install.packages("ggsci")
+```
+
+```{r}
+# installing the necessary packages and libraries
+library(plotly)
+library(ggsci)
+```
+
+
+```{r}
+#plotting first records using head
+head(HealthcareData) # Elements of first few rows
+```
+
+```{r}
+#displaying the column names
+colnames(HealthcareData) #Names of Columns which are the names of predictors and outcome variables
+
+```
+
+```{r}
+#dropping missing values
+library(tidyr)
+HealthcareData <- drop_na(HealthcareData)
+```
+
+```{r}
+
+#1)Define the age range in the given dataset. How is the age variable distributed amongst the data?
+
+# 1) Plotting the histogram for the variable Age
+ggplot(data = HealthcareData, aes(x = Age)) + 
+  geom_histogram(binwidth = 4.69, fill = "skyblue", color = "green", alpha = 0.5) +
+  labs(title = "Histogram of Age",
+       x = "Age",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+```{r}
+#2)	What is the distribution of individuals in the dataset according to the outcome variable? How many have diabetes and how many are without diabetes?
+
+library(ggplot2)
+ggplot(data = HealthcareData, aes(x = "", fill = as.factor(Outcome))) +
+  geom_bar(stat = "count") +
+  geom_text(stat = "count", aes(label = ..count..), position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") +
+  theme_void()  # Optional: removes unnecessary elements for a cleaner look
+```
+
+```{r}
+#2) plotting the graph for the target variable which is if the person has diebetis or not
+ggplot(data=HealthcareData)+
+geom_bar(mapping=aes(x=Outcome))
+```
+
+```{r}
+#3)Is there any relationship between the variables “age” and “Insulin? If yes, how are they related?
+#Adding Regression line
+ggplot(data = HealthcareData, mapping = aes(x = Age, y = Insulin)) +  geom_point() + labs(x = "Age", y = "Insulin", title = "Scatterplot: Age vs. Insulin") + geom_smooth(method = "lm")
+```
+
+```{r}
+# Install and load the corrplot library if not already installed
+# install.packages("corrplot")
+install.packages("corrplot")
+library(corrplot)
+```
+
+```{r}
+# 4)	How are variables related to the target variable? Identify the most and the least correlation between the variables.
+corr_matrix <- cor(HealthcareData[, c("BMI", "Glucose", "BloodPressure", "Age","Insulin","Pregnancies","Outcome")])
+# Create a correlation heatmap using corrplot
+corrplot(corr_matrix, method = "color", addCoef.col = "black")
+```
+
+
+```{r}
+#Plotting the target variable with respect to age
+#5)How does the outcome which is the target variable vary according to age?
+library(ggplot2)
+ggplot(HealthcareData, aes(x = Age, color = as.factor(Outcome))) +
+  geom_line(stat = "count")
+```
+
+```{r}
+#Adding Regression line
+#6)How are variables Insulin and Glucose related and what can be inferred with the correlation about the target variable?
+ggplot(data = HealthcareData, mapping = aes(x = Insulin, y = Glucose)) +  geom_point() + labs(x = "Insulin", y = "Glucose", title = "Scatterplot: Insulin vs. Glucose") + geom_smooth(method = "lm")
+```
+
+```{r}
+#7) "What is the predominant range of Glucose levels in the dataset, and how is the data distributed across different intervals?"
+ggplot(data = HealthcareData, aes(x = Glucose)) + 
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of Glucose",
+       x = "Glucose",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+```{r}
+# Install and load the corrplot library if not already installed
+# install.packages("corrplot")
+install.packages("corrplot")
+library(corrplot)
+```
+
+```{r}
+#8) Plotting Box plot for pregnancy count vs age
+ggplot(data = HealthcareData, aes(x = factor(Pregnancies), y = Age)) + 
+  geom_boxplot() +
+  labs(title = "Box Plot of Age by Pregnancy Category",
+       x = "Number of Pregnancies",
+       y = "Age") +
+  theme_minimal()
+```
+
+
+```{r}
+#4) Box Plots by Diabetes Outcome:
+#Visualize the distribution of variables such as BMI and Glucose for different diabetes outcomes.
+ggplot(data = HealthcareData, aes(x = Outcome, y = BMI)) + 
+  geom_boxplot() +
+  labs(title = "Box Plot of BMI by Outcome",
+       x = "Outcome",
+       y = "BMI") +
+  theme_minimal()
+```
+
+
+```{r}
+library(ggplot2)
+
+# Assuming 'data' is your dataframe
+ggplot(HealthcareData, aes(x = Age, fill = as.factor(Outcome))) +
+  geom_bar(position = "dodge", stat = "count")
+```
+
+```{r}
+#Adding Regression line
+ggplot(data = HealthcareData, mapping = aes(x = Insulin, y = Glucose)) +  geom_point() + labs(x = "Insulin", y = "Glucose", title = "Scatterplot: Insulin vs. Glucose") + geom_smooth(method = "lm")+ theme_minimal() +  facet_wrap(~Outcome, scales = "free")
+```

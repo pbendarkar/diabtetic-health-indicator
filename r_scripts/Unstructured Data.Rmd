@@ -1,0 +1,187 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+#install packages
+install.packages(c("tm", "ggplot2", "e1071", "caret", "quanteda", "irlba", "randomforest"))
+```
+
+```{r}
+#Read the csv file
+rawTextData <-read.csv("Unstructureddata.csv", stringsAsFactors = FALSE)
+str(rawTextData)
+```
+
+```{r}
+#to get string data:
+View(rawTextData) 
+
+#confirm the data is string and not categorial(factor)
+typeof(rawTextData$tweet_text)
+```
+
+```{r}
+# Install and load the stringi package
+install.packages("stringi")
+library(stringi)
+```
+
+```{r}
+# Function to clean and convert to UTF-8
+clean_and_convert <- function(text) {
+  # Remove non-UTF-8 characters
+  cleaned_text <- stringi::stri_trans_general(text, "latin-ascii")
+  # Convert to UTF-8
+  utf8_text <- stringi::stri_encode(cleaned_text, "UTF-8")
+  return(utf8_text)
+}
+```
+
+```{r}
+# Apply the function to your tweet_text column
+rawTextData$tweet_text <- sapply(rawTextData$tweet_text, clean_and_convert)
+```
+
+```{r}
+rawTextData$TextLength <-nchar(rawTextData$tweet_text)
+str(rawTextData)
+summary(rawTextData$TextLength)
+```
+
+```{r}
+# sentiment are labeled as 1, neutral as 2, and positive as 3.
+rawTextData$label <- as.factor(rawTextData$label)
+prop.table(table(rawTextData$label))
+```
+
+```{r}
+# Creating data visualization
+library(ggplot2)
+```
+```{r}
+ggplot(rawTextData, aes(x = factor(label))) +
+  geom_bar(fill = "lightgreen", color = "black") +
+  labs(title = "Number of Tweets by Sentiment",
+       x = "Sentiment",
+       y = "Number of Tweets") +
+  scale_x_discrete(labels = c("Negative", "Neutral", "Positive"))
+```
+```{r}
+#install package for text mining and 
+#Calling Library
+install.packages("tm")
+```
+
+```{r}
+#importing the necessary libraries
+library(tm)
+```
+
+```{r}
+#Pre-processing the unstructured data
+#Step 1:
+#Convert all data into one giant string Collapse is separating each element with a space
+rawTextData1 <- paste(rawTextData$tweet_text, collapse = " ") #collapse space 
+rawTextData1
+```
+
+```{r}
+#Calling Library
+library(tm)
+# Create a corpus from the tweet_text column
+source <-VectorSource(rawTextData1)
+Corpus <-Corpus(source)
+```
+
+```{r}
+#Step 2: to clean the data using the tm_map function removing stop words
+Corpus<-tm_map(Corpus, removeWords, stopwords("english"))
+stopwords('ENGLISH')
+inspect(Corpus)
+```
+
+```{r}
+#Step 3:
+#Need to also remove the punctuation to clean the data
+Corpus<-tm_map(Corpus, removePunctuation)
+inspect(Corpus)
+```
+
+```{r}
+#Step 4:
+#removing white spaces
+Corpus<-tm_map(Corpus, stripWhitespace)
+#Step 5:
+#Converting to all lower case
+Corpus<-tm_map(Corpus, content_transformer(tolower))
+inspect(Corpus)
+```
+
+```{r}
+#Step 4:
+#removing white spaces if the data has any and replacing with single spacing using strip
+Corpus<-tm_map(Corpus, stripWhitespace)
+inspect(Corpus)
+```
+
+
+```{r}
+#Frequency of words by creating Document Term Matrix
+dtm <- DocumentTermMatrix(Corpus)
+dtm1 <- as.matrix(dtm)
+#print
+dtm1
+```
+
+To Create a WORDCLOUD
+```{r}
+#Most frequent terms in matrix
+frequency <- colSums(dtm1)
+frequency <- sort(frequency, decreasing = TRUE) #most frequent terms sorted highest to lowest
+str(frequency)
+frequency
+```
+
+```{r}
+#Sort by decreasing frequency and create dataframe with data and frequency as columns
+dtml_sort <- sort(colSums(dtm1), decreasing = TRUE)
+dtm_d <- data.frame(word = names(dtml_sort), freq = dtml_sort)
+dtm_d
+```
+
+```{r}
+#Step 5:
+#Converting to all lower case
+Corpus<-tm_map(Corpus, content_transformer(tolower))
+inspect(Corpus)
+```
+
+```{r}
+#print(Corpus)
+Corpus_vect <- c(Corpus)
+```
+
+
+```{r}
+#Barplot
+barplot(dtm_d[1:5,]$freq, las = 2, names.arg = dtm_d[1:5,]$word,
+        col = "LightBlue", main = "Top 5 most frequent words",
+        ylab = "Word Frequencies")
+
+```
+```{r}
+#installing package
+install.packages("wordcloud")
+library(wordcloud)
+```
+
+```{r}
+words <-names(frequency)
+# Create a word cloud
+wordcloud(words[1:25], frequency[1:50]) #top 25 words
+wordcloud
+```
+
